@@ -1,25 +1,29 @@
 Summary:	VAAPI (Video Acceleration API)
 Summary(pl.UTF-8):	VAAPI (Video Acceleration API) - API akceleracji filmów
 Name:		libva1
-Version:	1.8.2
+Version:	1.8.3
 Release:	1
 License:	MIT
 Group:		Libraries
-Source0:	https://www.freedesktop.org/software/vaapi/releases/libva/libva-%{version}.tar.bz2
-# Source0-md5:	2ce6901495b64f4cc26dd0fb53eb5b14
-URL:		https://www.freedesktop.org/wiki/Software/vaapi
-BuildRequires:	Mesa-libEGL-devel
-BuildRequires:	Mesa-libGL-devel
+#Source0Download: https://github.com/intel/libva/releases/
+Source0:	https://github.com/intel/libva/archive/%{version}/libva-%{version}.tar.gz
+# Source0-md5:	a67880499d6a828e040a8cfce08b998c
+URL:		https://github.com/intel/libva
+BuildRequires:	EGL-devel
+BuildRequires:	OpenGL-devel
 BuildRequires:	autoconf >= 2.57
 BuildRequires:	automake
 BuildRequires:	libdrm-devel >= 2.4
 BuildRequires:	libtool
 BuildRequires:	pkgconfig
+BuildRequires:	pkgconfig(egl)
+BuildRequires:	pkgconfig(gl)
 # wayland-client
 BuildRequires:	wayland-devel >= 1.0.0
 BuildRequires:	xorg-lib-libX11-devel
 BuildRequires:	xorg-lib-libXext-devel
 BuildRequires:	xorg-lib-libXfixes-devel
+Obsoletes:	libva < 1.8.3
 BuildRoot:	%{tmpdir}/%{name}-%{version}-root-%(id -u -n)
 
 %description
@@ -41,6 +45,7 @@ Summary(pl.UTF-8):	VAAPI - biblioteka interfejsu DRM
 Group:		Libraries
 Requires:	%{name} = %{version}-%{release}
 Requires:	libdrm >= 2.4
+Obsoletes:	libva-drm < 1.8.3
 
 %description drm
 VAAPI - DRM interface library.
@@ -53,6 +58,7 @@ Summary:	VAAPI - EGL interface library
 Summary(pl.UTF-8):	VAAPI - biblioteka interfejsu EGL
 Group:		Libraries
 Requires:	%{name}-x11 = %{version}-%{release}
+Obsoletes:	libva-egl < 1.8.3
 
 %description egl
 VAAPI - EGL interface library.
@@ -65,6 +71,7 @@ Summary:	VAAPI - GLX interface library
 Summary(pl.UTF-8):	VAAPI - biblioteka interfejsu GLX
 Group:		Libraries
 Requires:	%{name}-x11 = %{version}-%{release}
+Obsoletes:	libva-glx < 1.8.3
 
 %description glx
 VAAPI - GLX interface library.
@@ -78,6 +85,7 @@ Summary(pl.UTF-8):	VAAPI - biblioteka interfejsu Wayland
 Group:		Libraries
 Requires:	%{name} = %{version}-%{release}
 Requires:	wayland >= 1.0.0
+Obsoletes:	libva-wayland < 1.8.3
 
 %description wayland
 VAAPI - Wayland interface library.
@@ -91,6 +99,7 @@ Summary(pl.UTF-8):	VAAPI - biblioteka interfejsu X11
 Group:		Libraries
 Requires:	%{name} = %{version}-%{release}
 Requires:	libdrm >= 2.4
+Obsoletes:	libva-x11 < 1.8.3
 
 %description x11
 VAAPI - X11 interface library.
@@ -115,11 +124,17 @@ VAAPI - biblioteka interfejsu X11.
 
 %install
 rm -rf $RPM_BUILD_ROOT
+install -d $RPM_BUILD_ROOT%{_libdir}/%{name}/dri
 
 %{__make} install \
 	DESTDIR=$RPM_BUILD_ROOT
 
-%{__rm} $RPM_BUILD_ROOT%{_libdir}/{%{name}/dri/*.la,libva*.la}
+%{__rm} $RPM_BUILD_ROOT%{_libdir}/libva*.la
+
+# no development package
+%{__rm} $RPM_BUILD_ROOT%{_libdir}/libva*.so
+%{__rm} -r $RPM_BUILD_ROOT%{_includedir}/va
+%{__rm} -r $RPM_BUILD_ROOT%{_pkgconfigdir}
 
 %clean
 rm -rf $RPM_BUILD_ROOT
@@ -151,7 +166,6 @@ rm -rf $RPM_BUILD_ROOT
 %attr(755,root,root) %ghost %{_libdir}/libva-tpi.so.1
 %dir %{_libdir}/%{name}
 %dir %{_libdir}/%{name}/dri
-%attr(755,root,root) %{_libdir}/%{name}/dri/dummy_drv_video.so
 
 %files drm
 %defattr(644,root,root,755)
